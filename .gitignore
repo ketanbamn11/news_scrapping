@@ -161,3 +161,28 @@ cython_debug/
 
 #environment
 env
+
+#react
+# Dependency directories
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Compiled output
+/build
+/dist
+
+# Environment variables
+.env
+
+# IDE or editor-specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
