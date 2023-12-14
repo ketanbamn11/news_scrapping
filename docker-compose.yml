@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  django:
+    build:
+      context: ./news_scrapping  # Path to the directory containing Django Dockerfile
+      dockerfile: Dockerfile  # Name of the Django Dockerfile
+    ports:
+      - "8000:8000"  # Expose Django server port
+    environment:
+      - DJANGO_ALLOWED_HOSTS=localhost  # Example environment variable (adjust as needed)
+    # Add other configurations as necessary for your Django setup
+
+  react:
+    build:
+      context: ./frontend  # Path to the directory containing React Dockerfile
+      dockerfile: Dockerfile  # Name of the React Dockerfile
+    ports:
+      - "3000:3000"  # Expose React development server port
