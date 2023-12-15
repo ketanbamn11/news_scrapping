@@ -1,6 +1,6 @@
-from django.conf.urls import url
-from django.urls import include, path
+from django.urls import path
+from .views import NewsDataView
 
 urlpatterns = [
-
+    path('get-news-data/', NewsDataView.as_view(), name='get-news-data'),
 ]
