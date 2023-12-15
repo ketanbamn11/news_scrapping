@@ -17,10 +17,21 @@ const TopNews = () => {
           <div className="data-list">
             {data.map((item, index) => (
               <div className="data-item" key={index}>
-                <h2>{item.title}</h2>
-                <img src={item.image} alt={item.title} />
-                <p>{item.description}</p>
-              </div>
+                  <h2>{item.title}</h2>
+                  {item.video ? (
+                    <iframe
+                      title={item.title}
+                      width="560"
+                      height="315"
+                      src={item.video}
+                      frameBorder="0"
+                      allowFullScreen
+                    ></iframe>
+                  ) : (
+                    <img src={item.image} alt={item.title} />
+                  )}
+                  <p>{item.description}</p>
+                </div>
             ))}
           </div>
         </div>
