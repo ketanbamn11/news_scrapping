@@ -26,7 +26,7 @@ help:
 
 build:
 	@echo -e "$(CYAN)Creating Docker images:$(COFF)"
-	@docker-compose up --build
+	@docker-compose up --build -d
 
 down:
 	@docker-compose down
