@@ -1,0 +1,53 @@
+/* styles.css */
+
+/* Reset default margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Basic styles */
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.data-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.data-item {
+  width: 100%; /* Two items per row with a small gap */
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+h2 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  font-weight: bold;
+  padding:10px;
+}
+
+img {
+  width: 50%;
+  height: auto;
+  border-radius: 5px;
+}
+
+p {
+  padding:10px;
+  font-size: 0.9em;
+  color: #555;
+  word-wrap: break-word;
+}
+h1{
+    text-align:center;
+    padding:2px;
+}
