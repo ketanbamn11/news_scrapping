@@ -1,3 +1,7 @@
+import logging
+import openai
+import requests
+from bs4 import BeautifulSoup
 from django.http import JsonResponse
 from django.views import View
 
@@ -10,33 +14,77 @@ class NewsDataView(View):
         data (list): List of dictionaries containing news data.
     """
 
-    data = [
-        {
-            "title": "Russia accepts violations recorded by Armenia television, radio commission",
-            "image": "https://news.am/img/news/79/77/58/default.jpg",
-            "description": "A meeting between the Ministry of High-Tech Industry of Armenia and the Ministry of Digital Development, Communications and Mass Media of Russia was held Thursday in Yerevan, on the matter of maintaining the provisions of the agreement, signed between the governments of the two countries, on cooperation in mass telecommunications."
-        },
-        {
-            "title": "Putin: I don't think it’s in Armenia's interest to stop membership in CIS, EAEU, CSTO",
-            "image": "https://i.ytimg.com/vi/aWPJ6x1WAho/sddefault.jpg",
-            "description": "I do not think that it is in Armenia's interest to somehow terminate membership in the CIS, EAEU, and CSTO. Russian President Vladimir Putin stated this, answering the Mir television reporter’s question about the future of the Commonwealth of Independent States (CIS), taking into account the respective positions of Armenia and Moldova."
-        },
-        {
-            "title": "Baku is against troops’ withdrawal from Armenia-Azerbaijan border",
-            "image": "https://news.am/img/news/79/77/20/default.jpg",
-            "description": "I will answer in brief: I do not agree with the opinion of the Armenian foreign minister. Azerbaijani FM Jeyhun Bayramov said this at Thursday’s joint news conference with his Turkish colleague, Hakan Fidan, commenting on Armenian foreign minister Ararat Mirzoyan's statement about the need for withdrawing the troops of Armenia and Azerbaijan from their border."
-        },
-        {
-            "title": "Putin: We were not the ones who left Karabakh, it was Armenia that recognized Karabakh as part of Azerbaijan",
-            "image": "https://i.ytimg.com/vi/aWPJ6x1WAho/sddefault.jpg",
-            "description": "It was not us that left Karabakh; it was Armenia that recognized that Karabakh is part of Azerbaijan. This was announced by Russian President Vladimir Putin, answering the Mir television reporter’s question about the future of the Commonwealth of Independent States (CIS), taking into account the respective positions of Armenia and Moldova."
-        },
-        {
-            "title": "Armenia ex-President Serzh Sargsyan on European Council head’s statement on Karabakh: Such words are zero guarantee",
-            "image": "https://ae01.alicdn.com/kf/S3619e57974f148d087c950fe497cdf55q/300x250.jpg",
-            "description": "The time will come, we will elaborate on what we meant when we made that statement. Armenia's third President Serzh Sargsyan told this to reporters Thursday outside a Yerevan court—and addressing the question of what he meant by saying that the Artsakh (Nagorno-Karabakh) “chapter” is not closed."
-        },
-    ]
+    def get_top_news_url_list(self):
+        url = "https://news.am/eng/"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        top_news_div = soup.find("div", class_="news-list short-top")
+        top_news_url = [a.get("href") for a in top_news_div.find_all("a")]
+        return top_news_url
+
+    def get_ai_summary(self, paragraph):
+        try:
+            openai.api_key = "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"
+            paragraph_completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": paragraph
+                        + " Give me short summary for this paragraph",
+                    }
+                ],
+            )
+            return paragraph_completion.choices[0]["message"]["content"]
+        except Exception as e:
+            logging.info(e)
+            return paragraph
+
+    def get_new_data(self, url):
+        """
+        Extracts title, image, and description from a news article URL.
+
+        Args:
+        - url (str): URL of the news article.
+
+        Returns:
+        - dict: Contains 'title', 'image', and 'description' keys with corresponding values.
+        """
+        try:
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, "html.parser")
+            if "tech.news.am" in url:
+                article = soup.find(id="opennewstext")
+                title = article.find("h1").get_text() if article.find("h1") else None
+                image = article.find("img").get("src") if article.find("img") else None
+                if image and "https" not in image:
+                    image = f"https://tech.news.am/{image}"
+                video = ""
+            else:
+                article = soup.find("div", class_="article-text")
+                title = str(soup.find("div", class_="article-title").text.strip())
+                if article.find("iframe"):
+                    video = article.find("iframe").get("src")
+                    image = ""
+                else:
+                    image = (
+                        article.find("img").get("src") if article.find("img") else None
+                    )
+                    if image and "https" not in image:
+                        image = f"https://news.am/{image}"
+                    video = ""
+            paragraph = article.find("p").get_text() if article.find("p") else None
+            return {
+                "title": title,
+                "image": image,
+                "description": self.get_ai_summary(paragraph),
+                "video": video,
+            }
+
+        except Exception as e:
+            logging.info(f"Unable to scrape the site URL: {url}")
+            logging.info(e)
+            return {"title": "", "image": "", "description": "", "video": ""}
 
     def get(self, request):
         """
@@ -48,5 +96,9 @@ class NewsDataView(View):
         Returns:
             JsonResponse: JSON response containing the news data.
         """
-        return JsonResponse(self.data, safe=False)
-
+        data = []
+        for url in self.get_top_news_url_list():
+            if "https" not in url:
+                url = f"https://news.am{url}"
+            data.append(self.get_new_data(url))
+        return JsonResponse(data, safe=False)
