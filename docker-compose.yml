@@ -18,7 +18,7 @@ services:
       context: ./frontend  # Path to the directory containing React Dockerfile
       dockerfile: Dockerfile  # Name of the React Dockerfile
     ports:
-      - "3000:3000"  # Expose React development server port
+      - "80:3000"  # Expose React development server port
 
 volumes:
   scrap_volume:
