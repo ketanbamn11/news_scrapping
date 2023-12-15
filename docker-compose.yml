@@ -10,6 +10,8 @@ services:
     environment:
       - DJANGO_ALLOWED_HOSTS=localhost  # Example environment variable (adjust as needed)
     # Add other configurations as necessary for your Django setup
+    volumes:
+      - ./news_scrapping:/app
 
   react:
     build:
@@ -17,3 +19,6 @@ services:
       dockerfile: Dockerfile  # Name of the React Dockerfile
     ports:
       - "3000:3000"  # Expose React development server port
+
+volumes:
+  scrap_volume:
