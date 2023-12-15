@@ -6,7 +6,7 @@ const TopNews = () => {
 
   useEffect(() => {
     // Fetch data from your Django endpoint
-    fetch('http://0.0.0.0:8000/get-news-data/')
+    fetch('http://52.207.228.88:8000/get-news-data/')
       .then(response => response.json())
       .then(data => setData(data))
       .catch(error => console.error('Error fetching data:', error));
