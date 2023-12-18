@@ -8,25 +8,33 @@ const Loader = () => (
 const TopNews = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  let apiUrl = process.env.REACT_APP_API_URL_PROD; // Default to production URL
+
+  if (window.location.hostname === 'localhost') {
+    apiUrl = process.env.REACT_APP_API_URL_LOCAL; // Update URL for localhost
+  }
 
   useEffect(() => {
-    fetch('http://52.207.228.88:8000/get-news-data/')
-      .then(response => response.json())
-      .then(data => {
-        setData(data);
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/get-news-data/`);
+        const jsonData = await response.json();
+        setData(jsonData);
         setIsLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching data:', error);
         setIsLoading(false);
-      });
-  }, []);
+      }
+    };
+
+    fetchData();
+  }, [apiUrl]);
 
   return (
     <div className="container">
       <h1>Daily Top News</h1>
       {isLoading ? (
-        <Loader /> // Show loader component if loading
+        <Loader />
       ) : (
         <div className="data-list">
           {data.map((item, index) => (
